@@ -48,16 +48,10 @@ spring:
 # Navigate to project directory
 cd c:\Users\sukri\Desktop\Project
 
-# Build the project (using Maven wrapper - no Maven installation needed)
-.\mvnw.cmd clean install
+# Build the project
+mvn clean install
 
 # Run the application
-.\mvnw.cmd spring-boot:run
-```
-
-**Note**: If you have Maven installed globally, you can also use:
-```bash
-mvn clean install
 mvn spring-boot:run
 ```
 
