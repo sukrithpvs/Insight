@@ -1,11 +1,18 @@
 package com.portfolio.manager.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.manager.dto.response.MarketMoverResponse;
 import com.portfolio.manager.dto.response.StockDetailResponse;
 import com.portfolio.manager.dto.response.StockHistoryResponse;
 import com.portfolio.manager.dto.response.StockHistoryResponse.HistoricalDataPoint;
+import com.portfolio.manager.entity.MarketCache;
+import com.portfolio.manager.repository.MarketCacheRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
@@ -18,18 +25,24 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class MarketDataService {
 
-    private static final List<String> US_STOCKS = Arrays.asList(
-            "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "JPM", "V", "WMT");
+    private final MarketCacheRepository cacheRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Cache for market data (1 hour TTL)
-    private static final long CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-    private final Map<String, CachedData<List<MarketMoverResponse>>> marketCache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MINUTES = 60; // 1 hour
+    private static final String CACHE_KEY_GAINERS = "top_gainers";
+    private static final String CACHE_KEY_LOSERS = "top_losers";
+    private static final String CACHE_KEY_INDICES = "market_indices";
+    private static final String CACHE_KEY_TRENDING = "trending_stocks";
+
+    private static final List<String> US_STOCKS = Arrays.asList(
+            "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "JPM", "V", "WMT",
+            "NFLX", "DIS", "PYPL", "INTC", "AMD", "CRM", "UBER", "SHOP", "SQ", "COIN");
 
     private static final Map<String, MockStockData> MOCK_STOCKS = new HashMap<>();
 
@@ -55,34 +68,104 @@ public class MarketDataService {
         MOCK_STOCKS.put("NFLX", new MockStockData("Netflix Inc.", 545.20, 1.5, 236e9, 42.3, "Technology", "Streaming"));
         MOCK_STOCKS.put("DIS",
                 new MockStockData("Walt Disney Co.", 112.45, -0.2, 205e9, 68.5, "Consumer Cyclical", "Entertainment"));
+        MOCK_STOCKS.put("PYPL",
+                new MockStockData("PayPal Holdings", 62.50, -2.1, 68e9, 15.2, "Financial", "Payment Services"));
+        MOCK_STOCKS.put("INTC",
+                new MockStockData("Intel Corp.", 42.80, 0.9, 180e9, 22.1, "Technology", "Semiconductors"));
+        MOCK_STOCKS.put("AMD", new MockStockData("AMD Inc.", 145.25, 3.5, 235e9, 45.8, "Technology", "Semiconductors"));
+        MOCK_STOCKS.put("CRM",
+                new MockStockData("Salesforce Inc.", 265.40, 1.2, 258e9, 38.5, "Technology", "Software"));
+        MOCK_STOCKS.put("UBER",
+                new MockStockData("Uber Technologies", 72.35, 2.4, 150e9, 85.2, "Technology", "Ride-Sharing"));
+        MOCK_STOCKS.put("SHOP",
+                new MockStockData("Shopify Inc.", 78.90, -0.8, 100e9, 52.3, "Technology", "E-Commerce"));
+        MOCK_STOCKS.put("SQ", new MockStockData("Block Inc.", 68.45, 1.8, 42e9, 28.9, "Financial", "Fintech"));
+        MOCK_STOCKS.put("COIN",
+                new MockStockData("Coinbase Global", 185.60, 5.2, 45e9, 55.2, "Financial", "Cryptocurrency"));
     }
 
-    // Cached wrapper class
-    private static class CachedData<T> {
-        T data;
-        long timestamp;
+    // =============== PUBLIC METHODS ===============
 
-        CachedData(T data) {
-            this.data = data;
-            this.timestamp = System.currentTimeMillis();
-        }
-
-        boolean isExpired() {
-            return System.currentTimeMillis() - timestamp > CACHE_TTL_MS;
-        }
-    }
-
+    @Transactional(readOnly = true)
     public List<MarketMoverResponse> getTopGainers() {
-        CachedData<List<MarketMoverResponse>> cached = marketCache.get("gainers");
-        if (cached != null && !cached.isExpired()) {
-            log.debug("Returning cached gainers data");
-            return cached.data;
+        return getCachedOrFetch(CACHE_KEY_GAINERS, this::fetchTopGainers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MarketMoverResponse> getTopLosers() {
+        return getCachedOrFetch(CACHE_KEY_LOSERS, this::fetchTopLosers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getMarketIndices() {
+        return getCachedOrFetch(CACHE_KEY_INDICES, this::fetchMarketIndices);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MarketMoverResponse> getTrendingStocks() {
+        return getCachedOrFetch(CACHE_KEY_TRENDING, this::fetchTrendingStocks);
+    }
+
+    // =============== SCHEDULED CACHE REFRESH ===============
+
+    @Scheduled(fixedRate = 3600000) // Every 1 hour
+    @Transactional
+    public void refreshAllCaches() {
+        log.info("Starting scheduled cache refresh at {}", LocalDateTime.now());
+        try {
+            updateCache(CACHE_KEY_GAINERS, fetchTopGainers());
+            updateCache(CACHE_KEY_LOSERS, fetchTopLosers());
+            updateCache(CACHE_KEY_INDICES, fetchMarketIndices());
+            updateCache(CACHE_KEY_TRENDING, fetchTrendingStocks());
+            log.info("Cache refresh completed successfully");
+        } catch (Exception e) {
+            log.error("Cache refresh failed: {}", e.getMessage());
+        }
+    }
+
+    // =============== CACHE HELPER METHODS ===============
+
+    @SuppressWarnings("unchecked")
+    private <T> T getCachedOrFetch(String key, java.util.function.Supplier<T> fetcher) {
+        try {
+            Optional<MarketCache> cached = cacheRepository.findByCacheKey(key);
+            if (cached.isPresent() && !cached.get().isExpired(CACHE_TTL_MINUTES)) {
+                log.debug("Returning cached data for key: {}", key);
+                return (T) objectMapper.readValue(cached.get().getCacheValue(), new TypeReference<Object>() {
+                });
+            }
+        } catch (Exception e) {
+            log.warn("Cache read error for {}: {}", key, e.getMessage());
         }
 
+        // Fetch fresh data
+        T data = fetcher.get();
+        updateCache(key, data);
+        return data;
+    }
+
+    @Transactional
+    public void updateCache(String key, Object data) {
+        try {
+            String json = objectMapper.writeValueAsString(data);
+            MarketCache cache = cacheRepository.findByCacheKey(key)
+                    .orElse(MarketCache.builder().cacheKey(key).build());
+            cache.setCacheValue(json);
+            cache.setUpdatedAt(LocalDateTime.now());
+            cacheRepository.save(cache);
+            log.debug("Updated cache for key: {}", key);
+        } catch (Exception e) {
+            log.error("Cache update error for {}: {}", key, e.getMessage());
+        }
+    }
+
+    // =============== DATA FETCHING METHODS ===============
+
+    private List<MarketMoverResponse> fetchTopGainers() {
         log.info("Fetching fresh top gainers data");
         List<MarketMoverResponse> gainers = new ArrayList<>();
 
-        for (String ticker : US_STOCKS) {
+        for (String ticker : US_STOCKS.subList(0, 10)) {
             try {
                 StockDetailResponse stock = getStockDetail(ticker);
                 if (stock.getChangePercent() != null && stock.getChangePercent().compareTo(BigDecimal.ZERO) > 0) {
@@ -94,23 +177,14 @@ public class MarketDataService {
         }
 
         gainers.sort((a, b) -> b.getChangePercent().compareTo(a.getChangePercent()));
-        List<MarketMoverResponse> result = gainers.stream().limit(5).toList();
-
-        marketCache.put("gainers", new CachedData<>(result));
-        return result;
+        return gainers.stream().limit(5).toList();
     }
 
-    public List<MarketMoverResponse> getTopLosers() {
-        CachedData<List<MarketMoverResponse>> cached = marketCache.get("losers");
-        if (cached != null && !cached.isExpired()) {
-            log.debug("Returning cached losers data");
-            return cached.data;
-        }
-
+    private List<MarketMoverResponse> fetchTopLosers() {
         log.info("Fetching fresh top losers data");
         List<MarketMoverResponse> losers = new ArrayList<>();
 
-        for (String ticker : US_STOCKS) {
+        for (String ticker : US_STOCKS.subList(0, 10)) {
             try {
                 StockDetailResponse stock = getStockDetail(ticker);
                 if (stock.getChangePercent() != null && stock.getChangePercent().compareTo(BigDecimal.ZERO) < 0) {
@@ -122,11 +196,52 @@ public class MarketDataService {
         }
 
         losers.sort(Comparator.comparing(MarketMoverResponse::getChangePercent));
-        List<MarketMoverResponse> result = losers.stream().limit(5).toList();
-
-        marketCache.put("losers", new CachedData<>(result));
-        return result;
+        return losers.stream().limit(5).toList();
     }
+
+    private List<MarketMoverResponse> fetchTrendingStocks() {
+        log.info("Fetching trending stocks");
+        List<MarketMoverResponse> trending = new ArrayList<>();
+
+        for (String ticker : US_STOCKS.subList(0, 8)) {
+            try {
+                StockDetailResponse stock = getStockDetail(ticker);
+                trending.add(toMarketMover(stock));
+            } catch (Exception e) {
+                log.warn("Error fetching trending {}: {}", ticker, e.getMessage());
+            }
+        }
+
+        return trending;
+    }
+
+    private List<Map<String, Object>> fetchMarketIndices() {
+        log.info("Fetching market indices");
+        List<Map<String, Object>> indices = new ArrayList<>();
+        Random rand = new Random();
+
+        // Simulate realistic index data
+        indices.add(createIndex("S&P 500", 5021.84, rand.nextDouble() * 2 - 0.5));
+        indices.add(createIndex("NASDAQ", 15990.66, rand.nextDouble() * 3 - 0.8));
+        indices.add(createIndex("DOW", 38519.84, rand.nextDouble() * 1.5 - 0.3));
+        indices.add(createIndex("FTSE 100", 7952.62, rand.nextDouble() * 1.2 - 0.6));
+        indices.add(createIndex("DAX", 17049.45, rand.nextDouble() * 1.8 - 0.4));
+        indices.add(createIndex("NIKKEI", 36286.71, rand.nextDouble() * 2.5 - 1.0));
+
+        return indices;
+    }
+
+    private Map<String, Object> createIndex(String name, double baseValue, double changePercent) {
+        double change = baseValue * changePercent / 100;
+        Map<String, Object> index = new HashMap<>();
+        index.put("name", name);
+        index.put("value", Math.round(baseValue * 100) / 100.0);
+        index.put("change", Math.round(change * 100) / 100.0);
+        index.put("changePercent", Math.round(changePercent * 100) / 100.0);
+        return index;
+    }
+
+    // =============== STOCK DETAIL METHODS ===============
 
     public StockHistoryResponse getStockWithHistory(String ticker) {
         String upperTicker = ticker.toUpperCase();
@@ -148,6 +263,23 @@ public class MarketDataService {
 
         return buildMockResponseWithHistory(upperTicker);
     }
+
+    public StockDetailResponse getStockDetail(String ticker) {
+        String upperTicker = ticker.toUpperCase();
+
+        try {
+            Stock stock = YahooFinance.get(upperTicker);
+            if (stock != null && stock.getQuote() != null) {
+                return buildDetailFromYahoo(stock);
+            }
+        } catch (Exception e) {
+            log.debug("Yahoo Finance unavailable for {}: {}", upperTicker, e.getMessage());
+        }
+
+        return buildMockDetail(upperTicker);
+    }
+
+    // =============== RESPONSE BUILDERS ===============
 
     private StockHistoryResponse buildFromYahooWithHistory(Stock stock) {
         StockQuote quote = stock.getQuote();
@@ -273,22 +405,6 @@ public class MarketDataService {
             cal.add(Calendar.DAY_OF_YEAR, 1);
         }
         return history;
-    }
-
-    public StockDetailResponse getStockDetail(String ticker) {
-        String upperTicker = ticker.toUpperCase();
-        log.info("Fetching stock detail for: {}", upperTicker);
-
-        try {
-            Stock stock = YahooFinance.get(upperTicker);
-            if (stock != null && stock.getQuote() != null) {
-                return buildDetailFromYahoo(stock);
-            }
-        } catch (Exception e) {
-            log.warn("Yahoo Finance unavailable for {}: {}", upperTicker, e.getMessage());
-        }
-
-        return buildMockDetail(upperTicker);
     }
 
     private StockDetailResponse buildDetailFromYahoo(Stock stock) {

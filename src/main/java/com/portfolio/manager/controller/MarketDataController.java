@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/market")
@@ -45,6 +46,18 @@ public class MarketDataController {
     @Operation(summary = "Get top losing stocks")
     public ResponseEntity<List<MarketMoverResponse>> getTopLosers() {
         return ResponseEntity.ok(marketDataService.getTopLosers());
+    }
+
+    @GetMapping("/indices")
+    @Operation(summary = "Get market indices (S&P 500, NASDAQ, DOW, etc.)")
+    public ResponseEntity<List<Map<String, Object>>> getMarketIndices() {
+        return ResponseEntity.ok(marketDataService.getMarketIndices());
+    }
+
+    @GetMapping("/trending")
+    @Operation(summary = "Get trending stocks")
+    public ResponseEntity<List<MarketMoverResponse>> getTrendingStocks() {
+        return ResponseEntity.ok(marketDataService.getTrendingStocks());
     }
 
     @GetMapping("/mutualfunds")

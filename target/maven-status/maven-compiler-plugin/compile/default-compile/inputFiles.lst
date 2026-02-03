@@ -2,6 +2,7 @@ C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\controller\Pr
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\dto\request\AddToWatchlistRequest.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\dto\request\CreateOrderRequest.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\service\HoldingService.java
+C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\entity\MarketCache.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\repository\HoldingRepository.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\dto\request\CreatePortfolioRequest.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\dto\response\PriceResponse.java
@@ -38,6 +39,7 @@ C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\PortfolioMana
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\service\OrderService.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\exception\BadRequestException.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\repository\PortfolioRepository.java
+C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\repository\MarketCacheRepository.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\controller\HoldingController.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\entity\WatchlistItem.java
 C:\Users\sukri\Desktop\Project\src\main\java\com\portfolio\manager\dto\response\MarketMoverResponse.java

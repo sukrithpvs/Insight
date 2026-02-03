@@ -46,11 +46,20 @@ public class PortfolioService {
         return toResponse(portfolio);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Portfolio getPortfolioEntity() {
-        return portfolioRepository.findAll().stream()
+        Portfolio portfolio = portfolioRepository.findAll().stream()
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found. Please create one first."));
+
+        // Fix legacy records with null cashBalance
+        if (portfolio.getCashBalance() == null) {
+            portfolio.initializeCashBalanceIfNull();
+            portfolioRepository.save(portfolio);
+            log.info("Initialized null cash balance to default $100,000 for portfolio ID: {}", portfolio.getId());
+        }
+
+        return portfolio;
     }
 
     @Transactional(readOnly = true)
