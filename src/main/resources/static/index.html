@@ -1309,6 +1309,71 @@
         function formatCurrency(val) { return '$' + parseFloat(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
         function formatLargeNumber(val) { const num = parseFloat(val); if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T'; if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'; if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'; if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K'; return num.toLocaleString(); }
         function showToast(msg, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>${msg}`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+
+        // Mutual Fund Detail Functions
+        function openMfDetail(schemeCode) {
+            document.getElementById('mfDetailModal').classList.add('active');
+            loadMfDetail(schemeCode);
+        }
+        function closeMfDetailModal() {
+            document.getElementById('mfDetailModal').classList.remove('active');
+        }
+        async function loadMfDetail(schemeCode) {
+            const container = document.getElementById('mfDetailContent');
+            container.innerHTML = '<div class="spinner"></div>';
+            try {
+                const res = await fetch(`${API_BASE}/market/mutualfunds/${schemeCode}`);
+                const mf = await res.json();
+                const oneY = parseFloat(mf.oneYearReturn || 0);
+                const threeY = parseFloat(mf.threeYearReturn || 0);
+                const fiveY = parseFloat(mf.fiveYearReturn || 0);
+                container.innerHTML = `
+                    <div class="stock-detail-header">
+                        <div class="stock-detail-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="fas fa-landmark"></i></div>
+                        <div>
+                            <div class="stock-detail-name">${mf.schemeName || 'Mutual Fund'}</div>
+                            <div class="stock-detail-ticker">${mf.fundHouse || ''}</div>
+                            <span class="sector-tag">${mf.category || 'Category'}</span>
+                        </div>
+                    </div>
+                    <div class="stock-detail-price">₹${parseFloat(mf.nav || 0).toFixed(2)}<span class="stat-change positive" style="font-size: 1rem; margin-left: 8px;">NAV</span></div>
+                    
+                    <div class="chart-section">
+                        <div class="chart-title"><i class="fas fa-chart-bar"></i> Returns Performance</div>
+                        <div style="display: flex; gap: 16px; margin: 12px 0;">
+                            <div class="stat-card" style="flex: 1; text-align: center;">
+                                <div class="stat-label">1 Year</div>
+                                <div class="stat-value ${oneY >= 0 ? 'positive' : 'negative'}">${oneY >= 0 ? '+' : ''}${oneY.toFixed(2)}%</div>
+                            </div>
+                            <div class="stat-card" style="flex: 1; text-align: center;">
+                                <div class="stat-label">3 Year</div>
+                                <div class="stat-value ${threeY >= 0 ? 'positive' : 'negative'}">${threeY >= 0 ? '+' : ''}${threeY.toFixed(2)}%</div>
+                            </div>
+                            <div class="stat-card" style="flex: 1; text-align: center;">
+                                <div class="stat-label">5 Year</div>
+                                <div class="stat-value ${fiveY >= 0 ? 'positive' : 'negative'}">${fiveY >= 0 ? '+' : ''}${fiveY.toFixed(2)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-detail-grid">
+                        <div class="stock-detail-item"><div class="stock-detail-label">Scheme Code</div><div class="stock-detail-value">${mf.schemeCode || 'N/A'}</div></div>
+                        <div class="stock-detail-item"><div class="stock-detail-label">Fund House</div><div class="stock-detail-value">${mf.fundHouse || 'N/A'}</div></div>
+                        <div class="stock-detail-item"><div class="stock-detail-label">Category</div><div class="stock-detail-value">${mf.category || 'N/A'}</div></div>
+                        <div class="stock-detail-item"><div class="stock-detail-label">Risk Level</div><div class="stock-detail-value">${mf.riskLevel || 'Moderate'}</div></div>
+                        <div class="stock-detail-item"><div class="stock-detail-label">Min Investment</div><div class="stock-detail-value">₹${mf.minInvestment || '500'}</div></div>
+                        <div class="stock-detail-item"><div class="stock-detail-label">Expense Ratio</div><div class="stock-detail-value">${mf.expenseRatio || '1.5'}%</div></div>
+                    </div>
+                    <div style="padding: 12px; background: var(--bg-dark); border-radius: 8px; margin-top: 12px;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Investment Objective</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${mf.objective || 'This fund aims to generate long-term capital appreciation by investing in a diversified portfolio of equity and equity-related securities.'}</div>
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load mutual fund details</p></div>';
+            }
+        }
+
         document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); }); });
     </script>
 </body>
