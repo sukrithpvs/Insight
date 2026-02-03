@@ -17,7 +17,7 @@ const MetricChip = ({ label, value, tooltip }) => {
         <span className="text-xs text-gray-400">{label}</span>
         <span className="tabular-nums text-sm font-semibold text-gray-100">{value}</span>
         {tooltip && (
-          <Info className="w-3 h-3 text-gray-50" />
+          <Info className="w-3 h-3 text-gray-500" />
         )}
       </motion.div>
       
