@@ -47,8 +47,6 @@ class CreateOrderRequestTest {
         CreateOrderRequest request = CreateOrderRequest.builder()
                 .ticker("GOOGL")
                 .orderType("BUY")
-                .quantity(new BigDecimal("2"))
-                .price(new BigDecimal("150.00"))
                 .build();
 
         assertEquals("BUY", request.getOrderType());
@@ -59,8 +57,6 @@ class CreateOrderRequestTest {
         CreateOrderRequest request = CreateOrderRequest.builder()
                 .ticker("AMZN")
                 .orderType("SELL")
-                .quantity(new BigDecimal("3"))
-                .price(new BigDecimal("180.00"))
                 .build();
 
         assertEquals("SELL", request.getOrderType());

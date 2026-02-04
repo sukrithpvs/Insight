@@ -24,6 +24,13 @@ class AddToWatchlistRequestTest {
     }
 
     @Test
+    void testAllArgsConstructor() {
+        AddToWatchlistRequest request = new AddToWatchlistRequest("TSLA", "EV leader");
+        assertEquals("TSLA", request.getTicker());
+        assertEquals("EV leader", request.getNotes());
+    }
+
+    @Test
     void testSettersAndGetters() {
         AddToWatchlistRequest request = new AddToWatchlistRequest();
         request.setTicker("TSLA");

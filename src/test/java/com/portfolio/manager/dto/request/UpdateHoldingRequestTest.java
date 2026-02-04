@@ -25,6 +25,13 @@ class UpdateHoldingRequestTest {
     }
 
     @Test
+    void testAllArgsConstructor() {
+        UpdateHoldingRequest request = new UpdateHoldingRequest(new BigDecimal("10"), new BigDecimal("200"));
+        assertEquals(new BigDecimal("10"), request.getQuantity());
+        assertEquals(new BigDecimal("200"), request.getAvgBuyPrice());
+    }
+
+    @Test
     void testSettersAndGetters() {
         UpdateHoldingRequest request = new UpdateHoldingRequest();
         request.setQuantity(new BigDecimal("20"));
@@ -32,26 +39,6 @@ class UpdateHoldingRequestTest {
 
         assertEquals(new BigDecimal("20"), request.getQuantity());
         assertEquals(new BigDecimal("200.00"), request.getAvgBuyPrice());
-    }
-
-    @Test
-    void testPartialUpdate_QuantityOnly() {
-        UpdateHoldingRequest request = UpdateHoldingRequest.builder()
-                .quantity(new BigDecimal("25"))
-                .build();
-
-        assertEquals(new BigDecimal("25"), request.getQuantity());
-        assertNull(request.getAvgBuyPrice());
-    }
-
-    @Test
-    void testPartialUpdate_PriceOnly() {
-        UpdateHoldingRequest request = UpdateHoldingRequest.builder()
-                .avgBuyPrice(new BigDecimal("175.50"))
-                .build();
-
-        assertNull(request.getQuantity());
-        assertEquals(new BigDecimal("175.50"), request.getAvgBuyPrice());
     }
 
     @Test

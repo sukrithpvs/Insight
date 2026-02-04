@@ -22,32 +22,38 @@ class StockHistoryResponseTest {
 
         StockHistoryResponse response = StockHistoryResponse.builder()
                 .ticker("AAPL")
-                .period("1y")
-                .data(dataPoints)
+                .name("Apple Inc.")
+                .exchange("NASDAQ")
+                .currency("USD")
+                .price(new BigDecimal("182.50"))
+                .historicalData(dataPoints)
                 .build();
 
         assertEquals("AAPL", response.getTicker());
-        assertEquals("1y", response.getPeriod());
-        assertEquals(1, response.getData().size());
+        assertEquals("Apple Inc.", response.getName());
+        assertEquals("NASDAQ", response.getExchange());
+        assertEquals(1, response.getHistoricalData().size());
     }
 
     @Test
     void testNoArgsConstructor() {
         StockHistoryResponse response = new StockHistoryResponse();
         assertNull(response.getTicker());
-        assertNull(response.getPeriod());
+        assertNull(response.getName());
     }
 
     @Test
     void testSettersAndGetters() {
         StockHistoryResponse response = new StockHistoryResponse();
         response.setTicker("TSLA");
-        response.setPeriod("5y");
-        response.setData(new ArrayList<>());
+        response.setName("Tesla Inc.");
+        response.setExchange("NASDAQ");
+        response.setCurrency("USD");
+        response.setHistoricalData(new ArrayList<>());
 
         assertEquals("TSLA", response.getTicker());
-        assertEquals("5y", response.getPeriod());
-        assertNotNull(response.getData());
+        assertEquals("Tesla Inc.", response.getName());
+        assertNotNull(response.getHistoricalData());
     }
 
     @Test
@@ -83,7 +89,7 @@ class StockHistoryResponseTest {
 
     @Test
     void testToString() {
-        StockHistoryResponse response = StockHistoryResponse.builder().ticker("GOOGL").period("1m").build();
+        StockHistoryResponse response = StockHistoryResponse.builder().ticker("GOOGL").name("Alphabet").build();
         assertNotNull(response.toString());
     }
 }

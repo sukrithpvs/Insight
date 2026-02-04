@@ -10,14 +10,14 @@ class StockDetailResponseTest {
     void testBuilder() {
         StockDetailResponse response = StockDetailResponse.builder()
                 .ticker("AAPL")
-                .companyName("Apple Inc.")
-                .currentPrice(new BigDecimal("182.50"))
+                .name("Apple Inc.")
+                .price(new BigDecimal("182.50"))
                 .change(new BigDecimal("2.50"))
                 .changePercent(new BigDecimal("1.39"))
-                .marketCap("2.8T")
+                .marketCap(new BigDecimal("2800000000000"))
                 .peRatio(new BigDecimal("28.5"))
-                .week52High(new BigDecimal("200.00"))
-                .week52Low(new BigDecimal("150.00"))
+                .fiftyTwoWeekHigh(new BigDecimal("200.00"))
+                .fiftyTwoWeekLow(new BigDecimal("150.00"))
                 .volume(50000000L)
                 .avgVolume(45000000L)
                 .exchange("NASDAQ")
@@ -26,9 +26,8 @@ class StockDetailResponseTest {
                 .build();
 
         assertEquals("AAPL", response.getTicker());
-        assertEquals("Apple Inc.", response.getCompanyName());
-        assertEquals(new BigDecimal("182.50"), response.getCurrentPrice());
-        assertEquals("2.8T", response.getMarketCap());
+        assertEquals("Apple Inc.", response.getName());
+        assertEquals(new BigDecimal("182.50"), response.getPrice());
         assertEquals(50000000L, response.getVolume());
         assertEquals("NASDAQ", response.getExchange());
         assertEquals("Technology", response.getSector());
@@ -38,21 +37,21 @@ class StockDetailResponseTest {
     void testNoArgsConstructor() {
         StockDetailResponse response = new StockDetailResponse();
         assertNull(response.getTicker());
-        assertNull(response.getCompanyName());
+        assertNull(response.getName());
     }
 
     @Test
     void testSettersAndGetters() {
         StockDetailResponse response = new StockDetailResponse();
         response.setTicker("MSFT");
-        response.setCompanyName("Microsoft Corporation");
-        response.setCurrentPrice(new BigDecimal("400.00"));
+        response.setName("Microsoft Corporation");
+        response.setPrice(new BigDecimal("400.00"));
         response.setChange(new BigDecimal("-5.00"));
         response.setChangePercent(new BigDecimal("-1.25"));
-        response.setMarketCap("3.0T");
+        response.setMarketCap(new BigDecimal("3000000000000"));
         response.setPeRatio(new BigDecimal("35.0"));
-        response.setWeek52High(new BigDecimal("420.00"));
-        response.setWeek52Low(new BigDecimal("300.00"));
+        response.setFiftyTwoWeekHigh(new BigDecimal("420.00"));
+        response.setFiftyTwoWeekLow(new BigDecimal("300.00"));
         response.setVolume(30000000L);
         response.setAvgVolume(25000000L);
         response.setExchange("NASDAQ");
@@ -60,8 +59,8 @@ class StockDetailResponseTest {
         response.setIndustry("Software");
 
         assertEquals("MSFT", response.getTicker());
-        assertEquals("Microsoft Corporation", response.getCompanyName());
-        assertEquals(new BigDecimal("400.00"), response.getCurrentPrice());
+        assertEquals("Microsoft Corporation", response.getName());
+        assertEquals(new BigDecimal("400.00"), response.getPrice());
     }
 
     @Test

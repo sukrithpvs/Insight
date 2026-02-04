@@ -10,17 +10,20 @@ class MarketMoverResponseTest {
     void testBuilder() {
         MarketMoverResponse response = MarketMoverResponse.builder()
                 .ticker("AAPL")
-                .companyName("Apple Inc.")
+                .name("Apple Inc.")
                 .price(new BigDecimal("182.50"))
                 .change(new BigDecimal("5.50"))
                 .changePercent(new BigDecimal("3.10"))
+                .volume(50000000L)
+                .marketCap(new BigDecimal("2800000000000"))
                 .build();
 
         assertEquals("AAPL", response.getTicker());
-        assertEquals("Apple Inc.", response.getCompanyName());
+        assertEquals("Apple Inc.", response.getName());
         assertEquals(new BigDecimal("182.50"), response.getPrice());
         assertEquals(new BigDecimal("5.50"), response.getChange());
         assertEquals(new BigDecimal("3.10"), response.getChangePercent());
+        assertEquals(50000000L, response.getVolume());
     }
 
     @Test
@@ -34,13 +37,14 @@ class MarketMoverResponseTest {
     void testSettersAndGetters() {
         MarketMoverResponse response = new MarketMoverResponse();
         response.setTicker("NVDA");
-        response.setCompanyName("NVIDIA Corporation");
+        response.setName("NVIDIA Corporation");
         response.setPrice(new BigDecimal("500.00"));
         response.setChange(new BigDecimal("-10.00"));
         response.setChangePercent(new BigDecimal("-2.00"));
+        response.setVolume(30000000L);
 
         assertEquals("NVDA", response.getTicker());
-        assertEquals("NVIDIA Corporation", response.getCompanyName());
+        assertEquals("NVIDIA Corporation", response.getName());
         assertEquals(new BigDecimal("500.00"), response.getPrice());
         assertEquals(new BigDecimal("-10.00"), response.getChange());
     }

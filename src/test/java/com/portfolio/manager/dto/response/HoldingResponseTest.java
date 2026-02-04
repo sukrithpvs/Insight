@@ -9,21 +9,20 @@ class HoldingResponseTest {
 
     @Test
     void testBuilder() {
+        LocalDateTime now = LocalDateTime.now();
         HoldingResponse response = HoldingResponse.builder()
                 .id(1L)
                 .ticker("AAPL")
-                .companyName("Apple Inc.")
                 .quantity(new BigDecimal("10.0000"))
                 .avgBuyPrice(new BigDecimal("182.50"))
-                .currentPrice(new BigDecimal("190.00"))
+                .createdAt(now)
                 .build();
 
         assertEquals(1L, response.getId());
         assertEquals("AAPL", response.getTicker());
-        assertEquals("Apple Inc.", response.getCompanyName());
         assertEquals(new BigDecimal("10.0000"), response.getQuantity());
         assertEquals(new BigDecimal("182.50"), response.getAvgBuyPrice());
-        assertEquals(new BigDecimal("190.00"), response.getCurrentPrice());
+        assertEquals(now, response.getCreatedAt());
     }
 
     @Test
@@ -35,9 +34,11 @@ class HoldingResponseTest {
 
     @Test
     void testAllArgsConstructor() {
-        HoldingResponse response = new HoldingResponse(1L, "AAPL", "Apple",
-                new BigDecimal("10"), new BigDecimal("180"), new BigDecimal("190"));
+        LocalDateTime now = LocalDateTime.now();
+        HoldingResponse response = new HoldingResponse(1L, "AAPL",
+                new BigDecimal("10"), new BigDecimal("180"), now);
         assertEquals(1L, response.getId());
+        assertEquals("AAPL", response.getTicker());
     }
 
     @Test
@@ -45,14 +46,13 @@ class HoldingResponseTest {
         HoldingResponse response = new HoldingResponse();
         response.setId(1L);
         response.setTicker("TSLA");
-        response.setCompanyName("Tesla");
         response.setQuantity(new BigDecimal("5"));
         response.setAvgBuyPrice(new BigDecimal("200"));
-        response.setCurrentPrice(new BigDecimal("250"));
+        response.setCreatedAt(LocalDateTime.now());
 
         assertEquals(1L, response.getId());
         assertEquals("TSLA", response.getTicker());
-        assertEquals("Tesla", response.getCompanyName());
+        assertEquals(new BigDecimal("5"), response.getQuantity());
     }
 
     @Test

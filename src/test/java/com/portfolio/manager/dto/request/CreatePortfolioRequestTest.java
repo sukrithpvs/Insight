@@ -21,6 +21,12 @@ class CreatePortfolioRequestTest {
     }
 
     @Test
+    void testAllArgsConstructor() {
+        CreatePortfolioRequest request = new CreatePortfolioRequest("Tech Portfolio");
+        assertEquals("Tech Portfolio", request.getName());
+    }
+
+    @Test
     void testSettersAndGetters() {
         CreatePortfolioRequest request = new CreatePortfolioRequest();
         request.setName("Tech Portfolio");

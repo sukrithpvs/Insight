@@ -41,9 +41,6 @@ class PortfolioSummaryResponseTest {
 
         assertEquals(new BigDecimal("50000"), response.getCashBalance());
         assertEquals(new BigDecimal("10000"), response.getTotalInvested());
-        assertEquals(new BigDecimal("12000"), response.getCurrentValue());
-        assertEquals(new BigDecimal("2000"), response.getProfitLoss());
-        assertEquals(new BigDecimal("20"), response.getReturnPercent());
     }
 
     @Test

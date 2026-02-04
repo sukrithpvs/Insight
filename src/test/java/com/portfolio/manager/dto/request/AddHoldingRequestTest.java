@@ -27,6 +27,13 @@ class AddHoldingRequestTest {
     }
 
     @Test
+    void testAllArgsConstructor() {
+        AddHoldingRequest request = new AddHoldingRequest("TSLA", new BigDecimal("5"), new BigDecimal("250"));
+        assertEquals("TSLA", request.getTicker());
+        assertEquals(new BigDecimal("5"), request.getQuantity());
+    }
+
+    @Test
     void testSettersAndGetters() {
         AddHoldingRequest request = new AddHoldingRequest();
         request.setTicker("MSFT");

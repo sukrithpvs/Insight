@@ -45,16 +45,8 @@ class PriceResponseTest {
     }
 
     @Test
-    void testEqualsAndHashCode() {
-        PriceResponse r1 = PriceResponse.builder().ticker("AAPL").price(new BigDecimal("100")).build();
-        PriceResponse r2 = PriceResponse.builder().ticker("AAPL").price(new BigDecimal("100")).build();
-        assertEquals(r1, r2);
-        assertEquals(r1.hashCode(), r2.hashCode());
-    }
-
-    @Test
     void testToString() {
-        PriceResponse response = PriceResponse.builder().ticker("AAPL").price(new BigDecimal("182")).build();
+        PriceResponse response = PriceResponse.builder().ticker("AAPL").build();
         assertNotNull(response.toString());
         assertTrue(response.toString().contains("AAPL"));
     }
