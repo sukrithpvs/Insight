@@ -1,0 +1,16 @@
+image: atlassian/default-image:4
+
+pipelines:
+  default:
+    - step:
+        name: Build Backend
+        image: maven:3.9.6-eclipse-temurin-17
+        script:
+          - mvn clean package
+
+    - step:
+        name: Build Frontend
+        image: node:18
+        script:
+          - cd frontend
+          - npm install
