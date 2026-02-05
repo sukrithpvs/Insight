@@ -20,7 +20,7 @@ const OrdersPage = () => {
       const transformed = data.map(order => ({
         id: order.id,
         ticker: order.ticker,
-        type: order.type,
+        type: order.orderType,
         qty: parseFloat(order.quantity || 0),
         price: parseFloat(order.price || 0),
         orderValue: parseFloat(order.totalAmount || 0),
