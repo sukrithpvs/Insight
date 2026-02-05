@@ -11,7 +11,8 @@ const MOCK_NEWS = [
     category: "Technology",
     time: "2 hours ago",
     source: "NASDAQ",
-    ticker: null
+    ticker: null,
+    link: "https://finance.yahoo.com/topic/tech"
   },
   {
     id: 2,
@@ -19,7 +20,8 @@ const MOCK_NEWS = [
     category: "Banking",
     time: "3 hours ago",
     source: "Reuters",
-    ticker: null
+    ticker: null,
+    link: "https://finance.yahoo.com/topic/economic-news"
   },
   {
     id: 3,
@@ -27,7 +29,8 @@ const MOCK_NEWS = [
     category: "Earnings",
     time: "4 hours ago",
     source: "Bloomberg",
-    ticker: "AAPL"
+    ticker: "AAPL",
+    link: "https://finance.yahoo.com/quote/AAPL/news"
   },
   {
     id: 4,
@@ -35,7 +38,8 @@ const MOCK_NEWS = [
     category: "Earnings",
     time: "5 hours ago",
     source: "CNBC",
-    ticker: "MSFT"
+    ticker: "MSFT",
+    link: "https://finance.yahoo.com/quote/MSFT/news"
   },
   {
     id: 5,
@@ -43,7 +47,8 @@ const MOCK_NEWS = [
     category: "Expansion",
     time: "6 hours ago",
     source: "Reuters",
-    ticker: "TSLA"
+    ticker: "TSLA",
+    link: "https://finance.yahoo.com/quote/TSLA/news"
   },
   {
     id: 6,
@@ -51,7 +56,8 @@ const MOCK_NEWS = [
     category: "Partnership",
     time: "7 hours ago",
     source: "WSJ",
-    ticker: "AMZN"
+    ticker: "AMZN",
+    link: "https://finance.yahoo.com/quote/AMZN/news"
   }
 ];
 

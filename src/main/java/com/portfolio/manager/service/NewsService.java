@@ -405,6 +405,14 @@ public class NewsService {
         news.put("source", source);
         if (ticker != null)
             news.put("ticker", ticker);
+        // Generate a Yahoo Finance search link for mock news (shows actual news
+        // articles)
+        try {
+            String searchTicker = ticker != null ? ticker : "market";
+            news.put("link", "https://finance.yahoo.com/quote/" + searchTicker + "/news");
+        } catch (Exception e) {
+            news.put("link", "https://finance.yahoo.com");
+        }
         return news;
     }
 }

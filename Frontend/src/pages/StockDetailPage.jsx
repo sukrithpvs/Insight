@@ -548,34 +548,39 @@ const StockDetailPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {news.slice(0, 6).map((item, idx) => (
-                  <a
-                    key={item.id || idx}
-                    href={item.link || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group block p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 hover:border-white/10 transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-surreal-violet/20 text-surreal-violet font-medium">
-                        {item.category || 'News'}
-                      </span>
-                      <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-surreal-cyan transition-colors" />
-                    </div>
-                    <h4 className="text-white font-medium text-sm mb-2 line-clamp-2 group-hover:text-surreal-cyan transition-colors">
-                      {item.title}
-                    </h4>
-                    {item.description && (
-                      <p className="text-gray-500 text-xs line-clamp-2 mb-2">
-                        {item.description}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{item.source || 'News'}</span>
-                      <span>{item.time}</span>
-                    </div>
-                  </a>
-                ))}
+                {news.slice(0, 6).map((item, idx) => {
+                  const newsLink = item.link && item.link.startsWith('http')
+                    ? item.link
+                    : `https://finance.yahoo.com/quote/${stock.ticker}/news`;
+                  return (
+                    <a
+                      key={item.id || idx}
+                      href={newsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 hover:border-white/10 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-surreal-violet/20 text-surreal-violet font-medium">
+                          {item.category || 'News'}
+                        </span>
+                        <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-surreal-cyan transition-colors" />
+                      </div>
+                      <h4 className="text-white font-medium text-sm mb-2 line-clamp-2 group-hover:text-surreal-cyan transition-colors">
+                        {item.title}
+                      </h4>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs line-clamp-2 mb-2">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{item.source || 'News'}</span>
+                        <span>{item.time}</span>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             )}
           </motion.div>
